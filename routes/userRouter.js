@@ -1,8 +1,10 @@
+require("dotenv").config()
 const express = require("express");
 const router = express.Router();
 const User = require("../model/Users");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const verifyToken = require("../middleware/jwtToken");
 
 router.get("/", (req, res) => {
   res.send("alo");
@@ -17,10 +19,16 @@ router.post("/api/auth/register", async (req, res) => {
     res.status(500).json(err);
   }
 });
-router.get("/api/users", async (req, res) => {
-  const users = await User.find({});
-  res.json(users);
+
+router.get("/api/users", verifyToken, async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.json(users);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
+
 router.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -34,7 +42,7 @@ router.post("/api/auth/login", async (req, res) => {
       return res.status(404).json({ message: "Invalid credentials" });
     } else {
       const userId = user.id;
-      const token = jwt.sign({ userId }, "my_secret_key");
+      const token = jwt.sign({ userId }, process.env.JWT_SECRET);
       res.status(200).json({ token });
     }
   } catch (error) {
