@@ -28,8 +28,7 @@ This API provides a backend for managing cinema reservations, films, and screeni
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/yourusername/cinema-reservation-api.git
-  cd cinema-reservation-api
-  npm install
-  JWT_SECRET=your_jwt_secret
-  npm start
-  ```
+2. **Navigate to the project directory:**
+  ```bash
+   cd cinema-reservation-api
+
