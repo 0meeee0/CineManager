@@ -13,6 +13,10 @@ const SeatSchema = mongoose.Schema({
     isReserved :{
         type: Boolean,
         default: false
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false,
     }
 })
 

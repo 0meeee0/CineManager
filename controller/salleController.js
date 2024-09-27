@@ -44,6 +44,7 @@ exports.deleteSalle = async (req, res) => {
     }
     salle.isDeleted = true;
     await salle.save();
+    await Seat.updateMany({ salle: req.params.id }, { isDeleted: true });
     res.json({ msg: "Salle deleted successfully", salle });
   } catch (err) {
     res.status(500).json({ err });
