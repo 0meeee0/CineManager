@@ -1,8 +1,14 @@
 const mongoose = require("mongoose");
 //nom, capacité, type de salle
 const SalleSchema = mongoose.Schema({
+  admin: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   name: {
     type: String,
+    unique: true,
     required: true,
   },
   capacity: {
@@ -13,8 +19,12 @@ const SalleSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const User = mongoose.model("Salle", SalleSchema);
+const Salle = mongoose.model("Salle", SalleSchema);
 
 module.exports = Salle;

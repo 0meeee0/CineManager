@@ -5,11 +5,13 @@ const app = express();
 const userRouter = require("./routes/userRouter");
 const filmRouter = require("./routes/filmRouter");
 const entityRouter = require("./routes/entityRouter");
+const salleRouter = require("./routes/salleRouter");
 const jwt = require("jsonwebtoken");
 
 app.use(express.json());
 app.use(userRouter);
 app.use('/api/film',filmRouter);
+app.use('/api/salle',salleRouter);
 app.use(entityRouter);
 
 mongoose
