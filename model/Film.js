@@ -9,6 +9,11 @@ const FilmSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  }
+  
 });
 
 const Film = mongoose.model("Film", FilmSchema);
