@@ -6,19 +6,25 @@ const SeanceSchema = mongoose.Schema({
     required: true,
   },
   film: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Film",
     required: true,
   },
   salle: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Salle",
     required: true,
   },
   tarifs: {
     type: Number,
     required: true,
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const User = mongoose.model("Seance", SeanceSchema);
+const Seance = mongoose.model("Seance", SeanceSchema);
 
 module.exports = Seance;
