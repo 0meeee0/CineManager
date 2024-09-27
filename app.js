@@ -6,6 +6,7 @@ const userRouter = require("./routes/userRouter");
 const filmRouter = require("./routes/filmRouter");
 const salleRouter = require("./routes/salleRouter");
 const seanceRouter = require("./routes/seanceRouter");
+const reservationRouter = require("./routes/reservationRouter");
 const jwt = require("jsonwebtoken");
 
 app.use(express.json());
@@ -13,6 +14,7 @@ app.use(userRouter);
 app.use('/api/film',filmRouter);
 app.use('/api/salle',salleRouter);
 app.use('/api/seance',seanceRouter);
+app.use('/api/reservation', reservationRouter)
 
 mongoose
   .connect(

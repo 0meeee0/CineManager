@@ -2,6 +2,7 @@ const User = require("../model/Users");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const tokenBlacklist = new Set();
 exports.register = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -40,4 +41,13 @@ exports.login = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Login failed" });
   }
+};
+
+exports.logout = async (req, res) => {
+    const token = req.header("Authorization")?.split(" ")[1];
+    if (!token) {
+      return res.status(400).json({ message: "No token provided." });
+    }
+    tokenBlacklist.add(token);
+    res.json({ message: "Logged out successfully." });
 };
