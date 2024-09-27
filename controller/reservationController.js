@@ -1,4 +1,5 @@
-const Reservation = require('../model/Reservation')
+const Reservation = require("../model/Reservation");
+const Seat = require("../model/Seat");
 
 exports.getReservations = async (req, res) => {
   try {
@@ -22,14 +23,22 @@ exports.addReservation = async (req, res) => {
     const { user, seance, seats } = req.body;
 
     if (!user || !seance || !seats) {
-      return res
-        .status(400)
-        .json({
-          msg: "Please provide all required fields (user, seance, seats)",
-        });
+      return res.status(400).json({
+        msg: "Please provide all required fields (user, seance, seats)",
+      });
+    }
+
+    const reservedSeats = await Seat.find({
+      _id: { $in: seats },
+      isReserved: true,
+    });
+    if (reservedSeats.length > 0) {
+      return res.status(400).json({ msg: "Seat is already reserved." });
     }
 
     const newReservation = await Reservation.create({ user, seance, seats });
+
+    await Seat.updateMany({ _id: { $in: seats } }, { isReserved: true });
     res
       .status(201)
       .json({ msg: "Reservation created successfully", newReservation });
