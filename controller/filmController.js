@@ -12,6 +12,18 @@ exports.getFilms = async (req, res) => {
         res.status(500).json({err});
     }
 }
+exports.getDeletedFilms = async (req, res) => {
+    try{
+        const films = await Film.find({isDeleted: true});
+        if(!films){
+            return res.status(404).json({msg: "No Deleted films found"});
+        }else{
+            res.json({"deleted Films":films});
+        }
+    }catch(err){
+        res.status(500).json({err});
+    }
+}
 exports.addFilm = async (req, res) => {
     try{
         // if(!(req.title || req.genre)){
