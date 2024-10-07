@@ -2,7 +2,7 @@ const User = require("../model/Users");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const tokenBlacklist = new Set();
+
 exports.register = async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -34,8 +34,12 @@ exports.login = async (req, res) => {
     if (!(user && (await bcrypt.compare(password, user.password)))) {
       return res.status(404).json({ message: "Invalid credentials" });
     } else {
-      const userId = user.id;
-      const token = jwt.sign({ userId }, process.env.JWT_SECRET);
+      // const user = user;
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
       res.status(200).json({ token });
     }
   } catch (error) {
@@ -48,6 +52,6 @@ exports.logout = async (req, res) => {
     if (!token) {
       return res.status(400).json({ message: "No token provided." });
     }
-    tokenBlacklist.add(token);
+    // tokenBlacklist.add(token);
     res.json({ message: "Logged out successfully." });
 };

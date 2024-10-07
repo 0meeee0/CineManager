@@ -12,7 +12,7 @@ router.get("/", (req, res) => {
 router.post("/api/auth/register", userController.register);
 router.get("/api/users", verifyToken, userController.getUsers);
 router.post("/api/auth/login", userController.login);
-router.post("/api/auth/logout", userController.logout);
+router.post("/api/auth/logout", verifyToken, userController.logout);
 router.post("/api/auth/forget");
 router.post("/api/auth/reset");
 

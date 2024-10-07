@@ -1,27 +1,33 @@
-require('dotenv').config()
-const jwt = require('jsonwebtoken')
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
-const tokenBlacklist = new Set();
 const verifyToken = (req, res, next) => {
-  const token = req.header("Authorization")?.split(" ")[1];
-  console.log("Token:", token);
+  const authHeader = req.header("Authorization");
+  if (!authHeader) {
+    return res
+      .status(401)
+      .json({ message: "Access Denied. No token provided." });
+  }
+
+  const token = authHeader.split(" ")[1];
+  console.log("Extracted Token:", token);
+
   if (!token) {
     return res
       .status(401)
       .json({ message: "Access Denied. No token provided." });
   }
 
-    if (tokenBlacklist.has(token)) {
-      return res.status(401).json({ message: "Access Denied. Invalid token." });
-    }
-    
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Verified:", verified); 
+    console.log("Token Verified:", verified);
     req.user = verified;
     next();
   } catch (err) {
-    res.status(400).json({ message: "Invalid token." });
+    console.error("JWT Verification Error:", err.message);
+    return res
+      .status(400)
+      .json({ message: "Invalid token.", error: err.message });
   }
 };
 
