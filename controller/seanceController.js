@@ -4,7 +4,7 @@ const Salle = require("../model/Salle");
 
 exports.getSeances = async (req, res) => {
   try {
-    const seances = await Seance.find({ isDeleted: false })
+    const seances = await Seance.find()
       .populate("film", "title")
       .populate("salle", "name");
 

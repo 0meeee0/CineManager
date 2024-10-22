@@ -22,8 +22,9 @@ exports.addReservation = async (req, res) => {
   try {
     const { seance, seats } = req.body;
     const user = req.user;
-    if (!seance || !seats) {
-      return res.status(400).json({
+    console.log(req.body)
+    if (!seance || !seats ) {
+      return res.status(400).json({ 
         msg: "Please provide all required fields (user, seance, seats)",
       });
     }

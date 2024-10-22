@@ -7,14 +7,19 @@ const filmRouter = require("./routes/filmRouter");
 const salleRouter = require("./routes/salleRouter");
 const seanceRouter = require("./routes/seanceRouter");
 const reservationRouter = require("./routes/reservationRouter");
-const jwt = require("jsonwebtoken");
+const commentRouter = require('./routes/commentRouter')
+const path = require("path");
+const cors = require('cors')
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(cors())
 app.use(express.json());
 app.use(userRouter);
 app.use('/api/film',filmRouter);
 app.use('/api/salle',salleRouter);
 app.use('/api/seance',seanceRouter);
 app.use('/api/reservation', reservationRouter)
+app.use('/api/comments', commentRouter)
 
 mongoose
   .connect(
@@ -22,7 +27,7 @@ mongoose
   )
   .then(() => {
     console.log("Connected to MongoDB");
-    app.listen(3000, () => {
+    app.listen(3001, () => {
       console.log("server started");
     });
   })
