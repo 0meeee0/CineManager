@@ -18,6 +18,10 @@ const FilmSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    video: {
+      type: String,
+      required: true
+    }
   },
   {
     timestamps: true,

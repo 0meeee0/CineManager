@@ -1,19 +1,47 @@
+const { log } = require('console');
 const Film = require('../model/Film');
+const Minio = require("minio");
 const multer = require("multer");
 const path = require("path");
+require('dotenv').config()
+const MinioController = require("./minioController");
 
+const minio = new Minio.Client({
+  endPoint: process.env.MINIO_ENDPOINT || "127.0.0.1",
+  port: parseInt(process.env.MINIO_PORT) || 9000,
+  useSSL: false,
+  accessKey: process.env.MINIO_ACCESS_KEY,
+  secretKey: process.env.MINIO_SECRET_KEY,
+});
 exports.getFilms = async (req, res) => {
-    try{
-        const films = await Film.find({isDeleted: false});
-        if(!films){
-            return res.status(404).json({msg: "No films found"});
-        }else{
-            res.json(films);
-        }
-    }catch(err){
-        res.status(500).json({err});
+  try {
+    const films = await Film.find({ isDeleted: false });
+
+    if (!films || films.length === 0) {
+      return res.status(404).json({ msg: "No films found" });
     }
-}
+
+    const filmsWithUrls = await Promise.all(
+      films.map(async (film) => {
+        const posterUrl = await MinioController.getFileUrl(
+          film.poster,
+          "posters"
+        );
+        const videoUrl = await MinioController.getFileUrl(film.video, "videos");
+        return {
+          ...film.toObject(),
+          posterUrl,
+          videoUrl,
+        };
+      })
+    );
+
+    res.json(filmsWithUrls);
+  } catch (error) {
+    console.error("Error fetching films:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 exports.getAllFilms = async (req, res) => {
     try{
         const films = await Film.find({});
@@ -65,55 +93,66 @@ exports.getDeletedFilms = async (req, res) => {
         res.status(500).json({err});
     }
 }
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(
-      null,
-      `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`
-    );
-  },
-});
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-}).single("poster");
+exports.uploadMoviePoster = async (file, folder) => {
+  const bucketName = process.env.MINIO_BUCKET_NAME;
+  const fileName = `${folder}/${file.originalname}`;
 
-exports.addFilm = async (req, res) => {
-  upload(req, res, async (err) => {
-    if (err) {
-      return res
-        .status(400)
-        .json({ msg: "Error uploading file", error: err.message });
-    }
+  // Check if the bucket exists, create it if not
+  const exists = await minio.bucketExists(bucketName);
+  if (!exists) {
+    await minio.makeBucket(bucketName, "us-east-1");
+  }
 
-    try {
-      const { title, genre, description } = req.body;
-
-      if (!title || !genre || !req.file) {
-        return res
-          .status(400)
-          .json({ msg: "Please provide all fields and upload a poster." });
-      }
-
-      const newFilm = await Film.create({
-        title,
-        genre,
-        description,
-        poster: `/uploads/${req.file.filename}`,
-      });
-
-      res.status(201).json({ msg: "Film added successfully", newFilm });
-    } catch (err) {
-      res.status(400).json({ msg: "Error creating film", error: err.message });
-    }
-  });
+  // Upload the file to MinIO
+  await minio.fPutObject(bucketName, fileName, file.path);
+  return `http://${process.env.MINIO_ENDPOINT || "127.0.0.1"}:${
+    process.env.MINIO_PORT || 9000
+  }/${bucketName}/${fileName}`;
 };
 
+// Controller: Add Film Handler
+exports.addFilm = async (req, res) => {
+  try {
+    const { title, genre, description } = req.body;
+
+    // Validate fields and files
+    if (!title || !genre || !req.files.poster || !req.files.video) {
+      return res.status(400).json({
+        msg: "Please provide all fields and upload both a poster and video.",
+      });
+    }
+
+    // Upload files to MinIO
+    const posterUrl = await exports.uploadMoviePoster(
+      req.files.poster[0],
+      "posters"
+    );
+    const videoUrl = await exports.uploadMoviePoster(
+      req.files.video[0],
+      "videos"
+    );
+
+    // Create new film entry
+    const newFilm = await Film.create({
+      title,
+      genre,
+      description,
+      poster: posterUrl,
+      video: videoUrl,
+    });
+
+    res.status(201).json({
+      msg: "Film added successfully",
+      newFilm,
+    });
+  } catch (err) {
+    res.status(400).json({
+      msg: "Error creating film",
+      error: err.message,
+    });
+  }
+};
 exports.editFilm = async (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
