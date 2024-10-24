@@ -3,7 +3,7 @@ const User = require("../model/Users");
 
 exports.getComments = async (req, res) => {
   try {
-    const comments = await Comment.find().populate("user_id");
+    const comments = await Comment.find();
     if (!comments) {
       return res.json({ msg: "No Comments Found" });
     } else {
@@ -14,25 +14,46 @@ exports.getComments = async (req, res) => {
   }
 };
 
+
 exports.addComment = async (req, res) => {
   try {
-      const {film_id, comment } = req.body;
+    const { film_id, comment } = req.body;
     const user = req.user;
-    // res.send(user)
-    if(!comment){
-        res.json({msg: "Empty Comment"})
+
+    if (!comment) {
+      return res.status(400).json({ msg: "Empty Comment" });
     }
+
     const newComment = await Comment.create({
       user_id: user.id,
       film_id,
       comment,
     });
-    // const saveComment = newComment.save();
+
+    const populatedComment = await newComment.populate("user_id", "name");
+
     res.status(201).json({
       message: "Comment added successfully.",
-      comment: newComment,
+      comment: populatedComment,
     });
   } catch (err) {
-    res.json({error: err});
+    console.error(err);
+    res.status(500).json({ error: "Failed to add comment." });
+  }
+};
+
+
+exports.getCommentsByFilmId = async (req, res) => {
+  try {
+    const { film_id } = req.params;
+
+    const comments = await Comment.find({ film_id })
+      .populate("user_id", "name")
+      .exec();
+
+    res.status(200).json(comments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch comments." });
   }
 };
