@@ -8,6 +8,7 @@ const salleRouter = require("./routes/salleRouter");
 const seanceRouter = require("./routes/seanceRouter");
 const reservationRouter = require("./routes/reservationRouter");
 const commentRouter = require('./routes/commentRouter')
+const ratingRouter = require("./routes/ratingRouter");
 const path = require("path");
 const cors = require('cors')
 
@@ -20,6 +21,7 @@ app.use('/api/salle',salleRouter);
 app.use('/api/seance',seanceRouter);
 app.use('/api/reservation', reservationRouter)
 app.use('/api/comments', commentRouter)
+app.use('/api/rating', ratingRouter)
 
 mongoose
   .connect(
