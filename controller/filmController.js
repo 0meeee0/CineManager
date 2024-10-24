@@ -1,70 +1,72 @@
-const Film = require('../model/Film');
+const Film = require("../model/Film");
 const multer = require("multer");
 const path = require("path");
 
 exports.getFilms = async (req, res) => {
-    try{
-        const films = await Film.find({isDeleted: false});
-        if(!films){
-            return res.status(404).json({msg: "No films found"});
-        }else{
-            res.json(films);
-        }
-    }catch(err){
-        res.status(500).json({err});
+  try {
+    const films = await Film.find({ isDeleted: false });
+    if (!films) {
+      return res.status(404).json({ msg: "No films found" });
+    } else {
+      res.json(films);
     }
-}
-exports.getAllFilms = async (req, res) => {
-    try{
-        const films = await Film.find({});
-        if(!films){
-            return res.status(404).json({msg: "No films found"});
-        }else{
-            res.json(films);
-        }
-    }catch(err){
-        res.status(500).json({err});
-    }
-}
-
-exports.get3Films = async(req, res)=>{
-  try{
-    const films = await Film.find().limit(3)
-    res.json(films)
-  }catch(err){
-    res.json({err: err})
+  } catch (err) {
+    res.status(500).json({ err });
   }
-}
+};
+exports.getAllFilms = async (req, res) => {
+  try {
+    const films = await Film.find({});
+    if (!films) {
+      return res.status(404).json({ msg: "No films found" });
+    } else {
+      res.json(films);
+    }
+  } catch (err) {
+    res.status(500).json({ err });
+  }
+};
+
+exports.get3Films = async (req, res) => {
+  try {
+    const films = await Film.find().limit(3);
+    res.json(films);
+  } catch (err) {
+    res.json({ err: err });
+  }
+};
 
 exports.searchFilm = async (req, res) => {
-    try{
-        const id = req.params.id
-        const film = await Film.findById(id)
-        res.send(film)
-    } catch(err){
-        res.send(err)
-    }
-}
-exports.latestFilm = async (req, res) =>{
-    try{
-        const film = await Film.find({isDeleted: false}).sort({_id: -1}).limit(1)
-        res.send(film)
-    } catch (err){
-        res.send(err)
-    }
-}
+  try {
+    const id = req.params.id;
+    const film = await Film.findById(id);
+    res.send(film);
+  } catch (err) {
+    res.send(err);
+  }
+};
+exports.latestFilm = async (req, res) => {
+  try {
+    const film = await Film.find({ isDeleted: false })
+      .sort({ _id: -1 })
+      .limit(1);
+    res.send(film);
+  } catch (err) {
+    res.send(err);
+  }
+};
 exports.getDeletedFilms = async (req, res) => {
-    try{
-        const films = await Film.find({isDeleted: true});
-        if(!films){
-            return res.status(404).json({msg: "No Deleted films found"});
-        }else{
-            res.json({"deleted Films":films});
-        }
-    }catch(err){
-        res.status(500).json({err});
+  try {
+    const films = await Film.find({ isDeleted: true });
+    if (!films) {
+      return res.status(404).json({ msg: "No Deleted films found" });
+    } else {
+      res.json({ "deleted Films": films });
     }
-}
+  } catch (err) {
+    res.status(500).json({ err });
+  }
+};
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -157,17 +159,17 @@ exports.editFilm = async (req, res) => {
   });
 };
 
-exports.deleteFilm = async(req, res) => {
-    try{
-        const deletedFilm = await Film.findById(req.params.id)
-        // res.send(deletedFilm)
-        if(!deletedFilm){
-            return res.status(404).json({msg: "Film not found"});
-        }
-        deletedFilm.isDeleted = true 
-        await deletedFilm.save()
-        res.json({msg: "Film Successfuly Deleted !",deletedFilm});
-    }catch(e){
-        res.status(500).json({msg: "Error", err: e});
+exports.deleteFilm = async (req, res) => {
+  try {
+    const deletedFilm = await Film.findById(req.params.id);
+    // res.send(deletedFilm)
+    if (!deletedFilm) {
+      return res.status(404).json({ msg: "Film not found" });
     }
-}
+    deletedFilm.isDeleted = true;
+    await deletedFilm.save();
+    res.json({ msg: "Film Successfuly Deleted !", deletedFilm });
+  } catch (e) {
+    res.status(500).json({ msg: "Error", err: e });
+  }
+};
