@@ -48,7 +48,7 @@ exports.getCommentsByFilmId = async (req, res) => {
     const { film_id } = req.params;
 
     const comments = await Comment.find({ film_id })
-      .populate("user_id", "name")
+      .populate("user_id", "name role")
       .exec();
 
     res.status(200).json(comments);
